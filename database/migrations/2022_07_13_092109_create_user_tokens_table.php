@@ -20,7 +20,7 @@ class CreateUserTokensTable extends Migration
             $table->text('token');
             $table->rememberToken();
             $table->timestamps();
-        })
+        });
     }
 
     /**
