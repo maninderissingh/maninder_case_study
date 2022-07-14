@@ -1,5 +1,8 @@
 <?php
 //use App\Http\Controllers\UserController;
+
+// use App\Http\Controllers\UserController;
+// use App\Http\Controllers\LoginController;
 use Illuminate\Http\Request;
 
 /*
@@ -17,3 +20,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::apiResource('user', UserController::class);
+
+Route::post('auth/login', 'AuthController@login')->name('auth.login');
+
+Route::group(['middleware' => 'authapi'], function()
+{
+    Route::apiResource('product', ProductsController::class);
+});

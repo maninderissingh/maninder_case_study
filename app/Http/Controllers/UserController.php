@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+
 
 class UserController extends Controller
 {
@@ -24,8 +27,6 @@ class UserController extends Controller
             'password' => 'required|max:255',
         ]);
 
-        //return response()->json( $validator->messages(), 200);
-        
         if ($validator->fails()) {
 
             $result['status'] = 0 ;
@@ -35,7 +36,7 @@ class UserController extends Controller
             // ALL IS WELL
             User::create([
                 'name' => $request->input('name'),
-                'password' => bcrypt($request->input('password')),
+                'password' => Hash::make($request->input('password')) ,
                 'email' => $request->input('email'),
             ]);
             $result['status'] = 1 ;
@@ -43,6 +44,8 @@ class UserController extends Controller
         }
         return response()->json($result, 200);
     }
+
+ 
 
 
 }
