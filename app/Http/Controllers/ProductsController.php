@@ -6,6 +6,7 @@ use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\ProductCollection;
 
 
 
@@ -18,11 +19,7 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        //
-        //die("DSS");
-        //echo request(); exit;
-        
-        return new ProductResource( Product::paginate(1));
+        return new ProductCollection( Product::paginate(10));
     }
 
     /**
@@ -44,14 +41,17 @@ class ProductsController extends Controller
     public function store(Request $request)
     {
         $result = [];
-        $validator = Validator::make($request->all(), [            
-            'name' => 'required|max:255',
-            'category' => 'required|max:255',
-            'description' => 'required|max:255',
-            'price' => 'required|numeric|max:255',
-            'avatar' => 'required|mimes:png,jpg,jpeg|max:1048',
-        ]);
-
+        $validationRules =  [           
+        'name' => 'required|max:255',
+        'category' => 'required|max:255',
+        'description' => 'required|max:255',
+        'price' => 'required|numeric|max:255',
+        ];
+        if($request->file('avatar')){
+            $validationRules['avatar'] = 'required|mimes:png,jpg,jpeg|max:1048';    
+        }
+        $validator = Validator::make($request->all(), $validationRules);
+        //$this->pr();
         if ($validator->fails()) {
 
             $result['status'] = 0 ;
@@ -59,9 +59,11 @@ class ProductsController extends Controller
             $result['message'] = "Data Not Valid." ;
         } else {
             // ALL IS WELL
-            $fileName = time().'.'.$request->file('avatar')->extension();  
-            $request->file('avatar')->move(public_path('uploads'), $fileName);
-
+            $fileName = "";
+            if($request->file('avatar')){
+                $fileName = time().'.'.$request->file('avatar')->extension();  
+                $request->file('avatar')->move(public_path('uploads'), $fileName);
+            }
 
             Product::create([
                 'name' => $request->input('name'),
@@ -85,6 +87,10 @@ class ProductsController extends Controller
     public function show(Product $product)
     {
         //
+        $this->pr($product);
+
+        
+        return new ProductResource( $product);
     }
 
     /**

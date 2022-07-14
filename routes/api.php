@@ -25,5 +25,6 @@ Route::post('auth/login', 'AuthController@login')->name('auth.login');
 
 Route::group(['middleware' => 'authapi'], function()
 {
+    
     Route::apiResource('product', ProductsController::class);
 });

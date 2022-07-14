@@ -10,4 +10,14 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    protected function pr($data, $out = 1){
+        echo "<pre>";
+        print_r($data);
+        echo "<pre>";
+        if($out){
+            exit;
+        }
+    }
+
 }
