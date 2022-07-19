@@ -24,6 +24,7 @@ class Authapi
                 'message' => 'Unauthorized access'
             ], 200);
         }
+        $request->user = $user;
         return $next($request);  
     }
 }

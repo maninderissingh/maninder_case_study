@@ -3,9 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use App\Http\Resources\CategoryResource;
 
-class ProductCollection extends ResourceCollection
+class CategoryCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.

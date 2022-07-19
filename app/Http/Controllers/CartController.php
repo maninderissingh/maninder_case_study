@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Product;
+use App\Cart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\ProductCollection;
+use App\Http\Resources\CartCollection;
+use App\Http\Resources\CartResource;
 
-
-
-class ProductsController extends Controller
+class CartController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new ProductCollection( Product::with('categoryRecord')->paginate(10));
+        
+        return new CartCollection( Cart::with('productRecord')->where(['session_id' => $request->input('session_id') ])->paginate(10));
     }
 
     /**
@@ -42,14 +42,10 @@ class ProductsController extends Controller
     {
         $result = [];
         $validationRules =  [           
-        'name' => 'required|max:255',
-        'category' => 'required|max:255',
-        'description' => 'required|max:255',
-        'price' => 'required|numeric|max:255',
+        'product_id' => 'required|numeric|max:255',
+        'qty' => 'required|numeric|max:255',
         ];
-        if($request->file('avatar')){
-            $validationRules['avatar'] = 'required|mimes:png,jpg,jpeg|max:1048';    
-        }
+        
         $validator = Validator::make($request->all(), $validationRules);
         //$this->pr();
         if ($validator->fails()) {
@@ -59,21 +55,23 @@ class ProductsController extends Controller
             $result['message'] = "Data Not Valid." ;
         } else {
             // ALL IS WELL
-            $fileName = "";
-            if($request->file('avatar')){
-                $fileName = time().'.'.$request->file('avatar')->extension();  
-                $request->file('avatar')->move(public_path('uploads'), $fileName);
+            $session_id = $request->input('session_id');
+            if(empty($session_id)){
+                // No Session ID in the Request
+                // User is Creating Fresh Cart
+                $session_id = Str::random(60);
             }
+            
 
-            Product::create([
-                'name' => $request->input('name'),
-                'category' => $request->input('category') ,
-                'description' => $request->input('description'),
-                'price' => $request->input('price'),
-                'avatar' => $fileName
+            Cart::create([
+                'session_id' => $session_id,
+                'user_id' => $request->user->id ,
+                'product_id' => $request->input('product_id'),
+                'qty' => $request->input('qty'),
             ]);
             $result['status'] = 1 ;
-            $result['message'] = "Product Created Successfully!" ;
+            $result['session_id'] = $session_id ;
+            $result['message'] = "Item added!" ;
         }
         return response()->json($result, 200);
     }
@@ -81,22 +79,21 @@ class ProductsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Cart  $cart
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show(Cart $cart)
     {
-        
-        return new ProductResource( $product);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Cart  $cart
      * @return \Illuminate\Http\Response
      */
-    public function edit(Product $product)
+    public function edit(Cart $cart)
     {
         //
     }
@@ -105,28 +102,31 @@ class ProductsController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Product  $product
+     * @param  \App\Cart  $cart
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Cart $cart)
     {
-        //
+        //$this->pr($cart);    
+        $cart->qty = $request->input("qty");
+        $cart->save();
+        $result['status'] = 1 ;
+        $result['message'] = "Item updated!";
+        return response()->json($result, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Cart  $cart
      * @return \Illuminate\Http\Response
      */
-    
-    public function destroy(Product $product)
+    public function destroy(Cart $cart)
     {
-        
-        $product->delete();
+        $cart->delete();
         $result['status'] = 1 ;
-        $result['message'] = "Product Deleted Successfully!" ;
+        $result['message'] = "Cart Item Deleted Successfully!" ;
     
-    return response()->json($result, 200);
+        return response()->json($result, 200); 
     }
 }

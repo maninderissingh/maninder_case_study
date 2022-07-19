@@ -27,4 +27,6 @@ Route::group(['middleware' => 'authapi'], function()
 {
     
     Route::apiResource('product', ProductsController::class);
+    Route::apiResource('cart', CartController::class);
+    Route::post('cart/list', 'CartController@index')->name('cart.list');
 });

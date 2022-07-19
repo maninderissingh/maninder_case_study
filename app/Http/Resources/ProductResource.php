@@ -1,9 +1,9 @@
 <?php
 namespace App\Http\Resources;
-   use Illuminate\Http\Resources\Json\ResourceCollection;
+   use Illuminate\Http\Resources\Json\Resource;
+   use App\Http\Resources\CategoryResource;
 
- 
-class ProductResource extends ResourceCollection
+class ProductResource extends Resource
 {
     /**
      * Transform the resource into an array.
@@ -14,9 +14,9 @@ class ProductResource extends ResourceCollection
     public function toArray($request)
     {
         return [
-            //'id' => $this->id,
+            'id' => $this->id,
             'name' => $this->name,
-            'cateogry' => $this->cateogry,
+            'cateogry' => new CategoryResource($this->categoryRecord),
             'description' => $this->description,
             'price' => $this->price,
         ];
